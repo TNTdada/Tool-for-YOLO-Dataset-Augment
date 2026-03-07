@@ -80,3 +80,10 @@
 ## 📅 预计后续会进行的更新
 - [ ] 加入设置参数记忆功能，避免每次启动重新设置参数。
 - [ ] 开发图形化 UI 界面版本 (PyQt6)。
+
+## 🙏 致谢 / Credits
+本项目 README 中的演示图片与测试数据集来源于 **Roboflow Universe**，特此向原作者表示感谢：
+
+- **数据集名称**：Football Players Detection
+- **来源链接**：[Roboflow Universe - Football Players Detection](https://universe.roboflow.com/roboflow-jvuqo/football-players-detection-3zvbc)
+- **用途**：仅用于本项目功能展示与效果预览。
