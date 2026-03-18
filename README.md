@@ -1,7 +1,7 @@
 # Tool-for-YOLO-Dataset-Augment
 **A Simple and Efficient Tool for YOLO Dataset Augmentation and Splitting**
 
-[English](README_en.md) | [简体中文](README_zh.md)
+[English](README.md) | [简体中文](README_zh.md)
 
 ![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)
 ![License](https://img.shields.io/badge/License-MIT-green.svg)
