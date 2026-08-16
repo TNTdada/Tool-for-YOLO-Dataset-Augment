@@ -1,0 +1,12 @@
+project-includes = ["src", "tests", "run_ui.py"]
+project-excludes = ["build", "dist", "outputs"]
+search-path = ["src"]
+use-ignore-files = true
+
+python-platform = "win32"
+python-version = "3.12"
+
+check-unannotated-defs = true
+infer-return-types = "checked"
+
+[errors]

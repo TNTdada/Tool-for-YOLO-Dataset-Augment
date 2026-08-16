@@ -1,91 +1,101 @@
 # Tool-for-YOLO-Dataset-Augment
-**A Simple and Efficient Tool for YOLO Dataset Augmentation and Splitting**
 
-[English](README.md) | [简体中文](README_zh.md)
 
-![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)
+**A desktop tool for augmenting, inspecting, and splitting YOLO object detection datasets**
+
+> v3.0 is the first PyQt6 desktop release of this project; v1.x and v2.x both used a terminal user interface (TUI).
+
+![Python](https://img.shields.io/badge/Python-3.10+-blue.svg)
 ![License](https://img.shields.io/badge/License-MIT-green.svg)
-![Version](https://img.shields.io/badge/Version-2.0-brightgreen.svg)
+![Version](https://img.shields.io/badge/Version-3.0-brightgreen.svg)
+
+[简体中文](README_zh.md) | [English](README.md)
 
 ## 📖 Introduction
-This project is an efficient dataset preprocessing tool specifically designed for YOLO object detection models. It provides 7 physical transformation augmentation schemes for existing labeled data (images and corresponding annotation files) through a Terminal User Interface (TUI). It supports automatic dataset splitting into **Train / Val / Test** structures and generates the `data.yaml` file, enabling the rapid augmentation and packaging of raw datasets for training.
+This project is a local dataset preprocessing tool for YOLO object detection models. Building on the core capabilities of the first two TUI generations, v3.0 has been rebuilt as a desktop application. Dataset selection and scanning, augmentation settings, class name mapping, effect previews, background processing, progress monitoring, and result access are all available in a single PyQt6 window.
+
+The application supports seven image augmentation methods and three execution modes: Full Pipeline, Augment Only, and Package Only. Full Pipeline splits the source samples first, then generates augmented versions separately within Train, Val, and Test. This processing order prevents data leakage caused by related samples being placed in different splits. Standard dataset outputs also use contiguous class IDs and include a `data.yaml` file.
 
 ---
 
 ## ✨ Features
-The script supports fully automated batch processing of raw datasets with customizable parameters, including image resizing, augmentation quantity/methods, and dataset split ratios. Key augmentation algorithms include:
+The application can scan, preview, and batch-process a source YOLO dataset. Users can configure the target size, number of augmented copies, random seed, number of combined operations, and dataset split ratios. Images and their label boxes are always transformed together. The main augmentation methods are described below:
 
-1. **Brightness Transformation**
-   Randomly adjusts image brightness to simulate strong exposure under direct sunlight or low-light conditions (overcast/dusk), enhancing the model's adaptability to varying lighting.
+1. **Brightness**
+   Randomly brightens or darkens an image to simulate strong exposure under direct sunlight during the day, or insufficient light on cloudy days and at dusk. This helps the model adapt to different lighting conditions. The brightness adjustment range can be configured in the settings.
 
 2. **Gaussian Noise**
-   Injects "salt-and-pepper" style noise into images to simulate artifacts from low-quality cameras, night vision equipment, or high ISO settings, improving model robustness against low-quality inputs.
+   Randomly adds a layer of coarse, snow-like speckles to an image, simulating noise produced by low-quality cameras, night-vision devices, or high-ISO photography. This improves model robustness on low-quality images. The noise intensity range can be limited in the settings.
 
-3. **Random Occlusion**
-   Randomly places opaque color blocks on the image to simulate partial obstructions. This forces the model to learn local features of the target. Users can limit the size of occlusion blocks to prevent complete target coverage.
+3. **Occlusion**
+   Places several opaque color blocks at random positions in an image to cover parts of the scene, simulating obstruction by other objects and encouraging the model to learn local target features. The block size range can be limited in the settings to prevent blocks from completely hiding a target or being too small to provide a useful augmentation effect.
 
 4. **& 5. Horizontal/Vertical Flip**
-   Flips images horizontally or vertically to increase the model's ability to recognize targets in various orientations.
+   Flips an image horizontally or vertically and updates its annotation boxes accordingly. These operations should only be enabled when the class semantics remain valid after flipping. Vertical flips are generally more suitable for orientation-insensitive scenarios such as aerial or microscopic imagery.
 
-6. **Geometric Rotation**
-   Rotates the image around its center axis, with remaining areas filled in black. 
-   > ⚠️ **Note**: Augmented bounding boxes are created by calculating the "Axis-Aligned Bounding Box (AABB)" of the original box after rotation. This may lead to a slight decrease in annotation precision; therefore, large-angle rotations are generally not recommended.
+6. **Rotation**
+   Randomly rotates an image around its center by an angle within the configured range. Empty areas are filled with a uniform value, improving the model's ability to handle pose variation. The rotation angle range can be configured in the settings.
+   > ⚠️ **Note**: After rotation, each new annotation box is created as an axis-aligned bounding rectangle enclosing the transformed original box. This can reduce annotation precision, so a large rotation range is generally not recommended.
 
 7. **Gaussian Blur**
-   Blurs image details and edges to simulate focus failure or motion blur (motion trailing) caused by fast-moving targets.
+   Blurs image details and edges to simulate failed lens focus or motion blur caused by a fast-moving target.
 
 ---
 
-## 🚀 Usage Guide
+## 🖥️ Major Improvements in v3.0
 
-### 1. Data Preparation
-Ensure the raw dataset is labeled, with images and label files placed in `images` and `labels` folders respectively.
+- **Complete desktop workflow**: Scanning, parameter configuration, class mapping, previewing a selected image, task execution, cancellation, logs, and result access are integrated into one window.
+- **Chinese and English interface**: Switch instantly between Chinese and English from the upper-right corner. Parameter names, execution modes, runtime status, and hover descriptions update together.
+- **Hover help for parameters**: Basic parameters, augmentation settings, split ratios, execution modes, and task buttons provide descriptions of their purpose, special values, and recommended ranges.
+- **Controlled randomness**: Batch processing supports a fixed random seed for reproducible augmentation and split results, while every preview click still generates a new random effect.
+- **Safer input scanning**: Detects missing labels, corrupted images, duplicate base names, empty label files, and invalid annotation lines. Empty labels can be retained as negative samples.
+- **Three output modes**: Augment Only outputs flat `images/labels` directories; Package Only outputs an unaugmented standard YOLO dataset; Full Pipeline outputs a standard YOLO dataset that is split before augmentation.
+- **Background tasks and state recovery**: Time-consuming scanning and processing run in background threads, with staged progress, copyable logs, safe cancellation, rerun support, and direct access to the output directory.
+- **Configuration and run records**: Supports importing and exporting configurations, restoring defaults, and remembering recent settings. Successful tasks save `run_config.json` and `run_summary.json`.
+- **Compact, expandable layout**: The parameter panel and runtime log can be expanded independently. The class mapping table scrolls separately, reducing full-page scrolling and accidental value changes caused by the mouse wheel.
 
-![Directory Structure 1](assets/Snipaste_2026-03-07_12-12-28.jpeg)
-![Directory Structure 2](assets/Snipaste_2026-03-07_12-13-01.jpeg)
-![Directory Structure 3](assets/Snipaste_2026-03-07_12-13-29.jpeg)
+## 🔄 Version History
 
-### 2. Mounting the Dataset
-Run the script and drag the raw dataset folder into the window (or enter the absolute path) and press Enter to enter the main interface, where scanning results will be displayed.
-
-![Scanning Results](assets/Snipaste_2026-03-07_12-14-46.jpeg)
-
-### 3. Parameter Adjustment
-The main menu displays various parameter information. Input `set` to adjust each parameter.
-
-![Main Menu Parameters](assets/Snipaste_2026-03-07_12-16-24.jpeg)
-![Parameter Settings Interface](assets/Snipaste_2026-03-07_12-19-23.jpeg)
-
-### 4. Label Mapping and Original Preview
-Since a `data.yaml` file is generated during dataset splitting, and default label information only contains numeric indices, label mapping is required. If unsure of the mapping, use the **Original Preview (p-series commands)** to randomly view annotations and ensure the correct correspondence between label names and indices.
-
-![Original Preview 1](assets/Snipaste_2026-03-07_12-27-28.jpeg)
-![Original Preview 2](assets/Snipaste_2026-03-07_12-28-52.jpeg)
-![Original Preview 3](assets/Snipaste_2026-03-07_12-29-37.jpeg)
-
-### 5. Augmentation Preview
-During parameter setup, use the **Augmentation Preview (a-series commands)** to randomly select images and apply current settings to compare "Before vs. After" effects. Adjust parameters further if the results do not meet expectations.
-
-![Augmentation Comparison Preview](assets/Snipaste_2026-03-07_12-38-00.jpeg)
-
-### 6. Execution and Results
-Once configured, proceed to augment and split the entire dataset. Results will be saved in the `augmented_dataset` directory:
-- `images` and `labels`: The full set of augmented data.
-- `yolo_dataset`: The packaged dataset, ready for YOLO training.
-
-![Output Results 1](assets/Snipaste_2026-03-07_13-01-09.jpeg)
-![Output Results 2](assets/Snipaste_2026-03-07_13-01-52.jpeg)
-![Output Results 3](assets/Snipaste_2026-03-07_13-02-18.jpeg)
+- **v1.x**: Introduced YOLO dataset scanning, basic augmentation, and the terminal interaction workflow.
+- **v2.x**: Further improved TUI parameter configuration, previews, dataset splitting, and training-format packaging.
+- **v3.0**: Migrated to a PyQt6 desktop application, separated the core and UI layers, and added a bilingual interface, background tasks, configuration persistence, parameter guidance, and a data-leakage prevention workflow.
 
 ---
 
-## 📅 Upcoming Updates
-- [ ] Persistent configuration memory to avoid re-setting parameters on every launch.
-- [ ] Graphical User Interface (GUI) version based on PyQt6.
+## 🚀 User Guide
 
-## 🙏 Acknowledgements / Credits
-The demonstration images and test datasets used in this README are provided by **Roboflow Universe**:
+### 1. Prepare the Data
+First, make sure the source dataset has been annotated, then place image files and label files in the `images` and `labels` directories respectively.
 
-- **Dataset Name**: Football Players Detection
-- **Source Link**: [Roboflow Universe - Football Players Detection](https://universe.roboflow.com/roboflow-jvuqo/football-players-detection-3zvbc)
-- **Usage**: Solely for functional demonstration and effect preview.
+
+### 2. Load the Dataset and Preconfigure Parameters
+Open the application, select or manually enter the source dataset directory, adjust the parameters as needed, and click `Scan Dataset`.
+
+![Scan the dataset](assets/Snipaste_2026-07-15_16-59-57.jpg)
+
+### 3. Preview Effects and Map Class Names
+After scanning, click `Preview Sample`. You can randomly select or explicitly choose an image from the source dataset and compare the original with its augmented preview.
+
+![Preview augmentation effects](assets/Snipaste_2026-07-15_17-04-02.jpg)
+
+You can further adjust the augmentation parameters based on the preview. Dataset packaging also generates a `data.yaml` file, while the original labels contain only numeric class indices. You therefore need to edit the `Class Name Mapping` table manually and map each numeric index to its actual class name.
+
+![Edit class name mappings](assets/Snipaste_2026-07-15_17-04-40.jpg)
+
+### 4. Run the Task and View the Results
+After completing the settings, click `Start Task`. The application will automatically split, augment, organize, and package the source dataset, producing a standard YOLO dataset directory. When the task finishes, click `Open Output` to access the result quickly.
+
+![Start the task](assets/Snipaste_2026-07-15_17-05-11.jpg)
+![Task in progress](assets/Snipaste_2026-07-15_17-05-50.jpg)
+![Task completed](assets/Snipaste_2026-07-15_17-06-33.jpg)
+
+
+
+---
+
+## 🙏 Acknowledgements
+The demonstration images and test dataset used in this project's README come from **Roboflow Universe**. We sincerely thank the original authors:
+
+- **Dataset**: Football Players Detection
+- **Source**: [Roboflow Universe - Football Players Detection](https://universe.roboflow.com/roboflow-jvuqo/football-players-detection-3zvbc)
+- **Usage**: Used solely to demonstrate and preview this project's functionality.

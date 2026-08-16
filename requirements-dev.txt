@@ -1,0 +1,6 @@
+-r requirements.txt
+
+pyinstaller>=6,<7
+pyrefly>=1,<2
+pytest>=8,<10
+types-PyYAML>=6,<7
